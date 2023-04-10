@@ -1,0 +1,87 @@
+package com.example.englishassistantapp.domain.network.internal
+
+import com.example.englishassistantapp.domain.network.OpenAIConfig
+import com.example.englishassistantapp.domain.network.ProxyConfig
+import com.example.englishassistantapp.domain.network.internal.extension.toKtorLogLevel
+import com.example.englishassistantapp.domain.network.internal.extension.toKtorLogger
+import io.ktor.client.*
+import io.ktor.client.engine.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.auth.*
+import io.ktor.client.plugins.auth.providers.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.logging.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.*
+import io.ktor.util.*
+import kotlinx.serialization.json.Json
+import kotlin.time.DurationUnit
+
+/**
+ * Default Http Client.
+ */
+internal fun createHttpClient(config: OpenAIConfig): HttpClient {
+    return HttpClient {
+        engine {
+            config.proxy?.let { proxyConfig ->
+                proxy = when (proxyConfig) {
+                    is ProxyConfig.Http -> ProxyBuilder.http(proxyConfig.url)
+                    is ProxyConfig.Socks -> ProxyBuilder.socks(proxyConfig.host, proxyConfig.port)
+                }
+            }
+        }
+
+        install(ContentNegotiation) {
+            register(ContentType.Application.Json, KotlinxSerializationConverter(JsonLenient))
+        }
+
+        install(Logging) {
+            logger = config.logger.toKtorLogger()
+            level = config.logLevel.toKtorLogLevel()
+        }
+
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    BearerTokens(accessToken = config.token, refreshToken = "")
+                }
+            }
+        }
+
+        install(HttpTimeout) {
+            config.timeout.socket?.let { socketTimeout ->
+                socketTimeoutMillis = socketTimeout.toLong(DurationUnit.MILLISECONDS)
+            }
+            config.timeout.connect?.let { connectTimeout ->
+                connectTimeoutMillis = connectTimeout.toLong(DurationUnit.MILLISECONDS)
+            }
+            config.timeout.request?.let { requestTimeout ->
+                requestTimeoutMillis = requestTimeout.toLong(DurationUnit.MILLISECONDS)
+            }
+        }
+
+        install(HttpRequestRetry) {
+            maxRetries = config.retry.maxRetries
+            // retry on rate limit error.
+            retryIf { _, response -> response.status.value.let { it == 429 } }
+            exponentialDelay(config.retry.base, config.retry.maxDelay.inWholeMilliseconds)
+        }
+
+        defaultRequest {
+            url(config.host.baseUrl)
+            config.host.queryParams.onEach { (key, value) -> url.parameters.appendIfNameAbsent(key, value) }
+            config.organization?.let { organization -> headers.append("OpenAI-Organization", organization) }
+            config.headers.onEach { (key, value) -> headers.appendIfNameAbsent(key, value) }
+        }
+
+        expectSuccess = true
+    }
+}
+
+/**
+ * Internal Json Serializer.
+ */
+internal val JsonLenient = Json {
+    isLenient = true
+    ignoreUnknownKeys = true
+}
