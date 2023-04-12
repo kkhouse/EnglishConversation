@@ -1,7 +1,7 @@
 package com.example.englishassistantapp.domain.network
 
 import com.aallam.openai.api.BetaOpenAI
-import com.aallam.openai.api.chat.ChatCompletion
+import com.example.englishassistantapp.domain.network.model.ChatCompletion
 import com.aallam.openai.api.chat.ChatCompletionChunk
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import kotlinx.coroutines.flow.Flow

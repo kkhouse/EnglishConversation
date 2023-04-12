@@ -1,4 +1,4 @@
-package com.aallam.openai.api.chat;
+package com.example.englishassistantapp.domain.network.model;
 
 import com.aallam.openai.api.BetaOpenAI
 import kotlinx.serialization.SerialName
