@@ -1,11 +1,16 @@
 package com.example.englishassistantapp
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.aallam.openai.api.BetaOpenAI
@@ -29,17 +34,38 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             EnglishAssistantAppTheme {
-                // TODO
-                val granted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                var grant by remember { mutableStateOf(granted) }
-                if (granted != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.RECORD_AUDIO), PERMISSIONS_RECORD_AUDIO)
+                val context = LocalContext.current
+                var isPermissionGranted by remember { mutableStateOf(false) }
+                val launcher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { isGranted -> isPermissionGranted = isGranted }
+
+                LaunchedEffect(Unit) {
+                    when (PackageManager.PERMISSION_GRANTED) {
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) -> {
+                            isPermissionGranted = true
+                        }
+                        else -> launcher.launch(Manifest.permission.RECORD_AUDIO)
+                    }
                 }
 
-                if(grant ==  PackageManager.PERMISSION_GRANTED) {
-                    Conversation()
-                }
+                if(isPermissionGranted) { Conversation() }
             }
         }
+    }
+}
+
+
+fun checkAndRequestCameraPermission(
+    context: Context,
+    permission: String,
+    launcher: ManagedActivityResultLauncher<String, Boolean>
+) {
+    val permissionCheckResult = ContextCompat.checkSelfPermission(context, permission)
+    if (permissionCheckResult == PackageManager.PERMISSION_GRANTED) {
+        // Open camera because permission is already granted
+    } else {
+        // Request a permission
+        launcher.launch(permission)
     }
 }
