@@ -58,12 +58,15 @@ dependencies {
     implementation(libs.androidx.ktx)
     implementation(libs.bundles.compose.ui)
     implementation(libs.android.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.viewmodel.compose)
     implementation(libs.androidx.compose)
-    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material3)
+
     implementation(libs.openAi.client)
     implementation(libs.serialization.core)
     implementation(libs.dagger)
     kapt(libs.dagger.compiler)
+    implementation(libs.androidx.compose.ui.googlefonts)
 
 
     implementation(libs.ktor.client.android)

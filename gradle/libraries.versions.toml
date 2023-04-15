@@ -2,7 +2,7 @@
 kotlin = "1.7.0"
 android-plugin = "7.4.1"
 compose-ui = "1.2.0"
-m3version="1.0.0-alpha11"
+m3version="1.1.0-alpha07"
 lifecycle-runtime-ktx = "2.5.1"
 lifecycle-viewmodel = "2.5.1"
 activity-compose = "1.3.1"
@@ -50,6 +50,7 @@ logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.
 # ulid
 ulid = { group = "com.aallam.ulid", name = "ulid-kotlin", version = "1.2.1" }
 
+
 ## ここから追加
 #openAi
 openAi-client = { group="com.aallam.openai", name = "openai-client", version.ref = "openai" }
@@ -61,8 +62,9 @@ compose-preview = { group= "androidx.compose.ui", name = "ui-tooling-preview", v
 #any android dependencies
 androidx-ktx  = { group = "androidx.core" ,name = "core-ktx", version.ref = "kotlin" }
 androidx-compose  = { group = "androidx.activity" ,name = "activity-compose", version.ref = "activity-compose" }
-androidx-compose-material = { group = "androidx.compose.material3" ,name = "material3", version.ref = "m3version" }
-
+androidx-compose-material3 = { group = "androidx.compose.material3" ,name = "material3", version.ref = "m3version" }
+androidx-viewmodel-compose = { group = "androidx.lifecycle" ,name = "lifecycle-viewmodel-compose", version.ref = "lifecycle-viewmodel" }
+androidx-compose-ui-googlefonts = { module = "androidx.compose.ui:ui-text-google-fonts" }
 android-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle-viewmodel"}
 android-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle-viewmodel"}
 

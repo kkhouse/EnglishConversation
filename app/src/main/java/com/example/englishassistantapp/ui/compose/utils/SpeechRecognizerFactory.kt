@@ -1,4 +1,4 @@
-package com.example.englishassistantapp.ui.utils
+package com.example.englishassistantapp.ui.compose.utils
 
 import android.content.Context
 import android.content.Intent
@@ -15,13 +15,13 @@ private const val TAG = "com.example.englishassistantapp.ui.utils"
 object SpeechRecognizerFactory {
     fun create(
         context: Context,
+        onResult: (String) -> Unit,
+        onError: () -> Unit,
         onReadyForSpeech: (Bundle?) -> Unit = {},
         onBeginningOfSpeech: () -> Unit= {},
         onRmsChanged: (Float) -> Unit= {},
         onBufferReceived: (ByteArray?) -> Unit= {},
         onEndOfSpeech: () -> Unit= {},
-        onError: () -> Unit= {},
-        onResult: (String) -> Unit,
         onPartialResults: (String) -> Unit = {},
         onEvent: (Int, Bundle?) -> Unit = {_, _ -> }
     ): SpeechRecognizer {

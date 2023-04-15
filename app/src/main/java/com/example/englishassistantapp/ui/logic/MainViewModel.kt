@@ -1,5 +1,6 @@
 package com.example.englishassistantapp.ui.logic
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.englishassistantapp.ui.uimodel.UiState
@@ -14,10 +15,15 @@ class MainViewModel @Inject constructor(
     private val _uiState: MutableStateFlow<UiState>
 ) : ViewModel() {
 
-    private val uiState = _uiState.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
+    val uiState = _uiState.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
 
     init {
-        viewModelScope.launch { handler.initUiState(_uiState.value) }
+        Log.d("TAGTAGTAG", ": viewMOdel init ")
+        viewModelScope.launch {
+            handler.initUiState(_uiState.value).collect { newState ->
+                _uiState.value = newState
+            }
+        }
     }
 
     fun finishedSpeaking(content: String) {
@@ -25,7 +31,9 @@ class MainViewModel @Inject constructor(
             handler.addNewMessage(
                 currentState = _uiState.value,
                 message = content
-            )
+            ).collect { newState ->
+                _uiState.value = newState
+            }
         }
     }
 }

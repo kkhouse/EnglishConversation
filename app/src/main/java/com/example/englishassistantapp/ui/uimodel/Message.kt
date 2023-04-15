@@ -13,19 +13,26 @@ data class UiState(
 )
 
 data class Message(
-    val author: Author? = Author.Me,
+    val author: Author = Author.Me,
     val content: String = "",
     val authorImage: Int = if (author == Author.Me) R.drawable.ic_me_24dp else R.drawable.ic_assistant_24dp,
 )
 
 enum class Author {
-    Me, Assistant;
+    Me, Assistant, System;
     companion object {
-        fun fromRole(role: ChatRole): Author? {
+        fun fromRole(role: ChatRole): Author {
             return when(role) {
                 ChatRole.User -> Me
                 ChatRole.Assistant -> Assistant
-                else -> null
+                else -> throw IllegalStateException()
+            }
+        }
+        fun Author.toValue(): String {
+            return when(this) {
+                Me -> "Me"
+                Assistant -> "Assistant"
+                System -> throw IllegalStateException()
             }
         }
     }

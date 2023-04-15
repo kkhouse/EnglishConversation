@@ -1,4 +1,4 @@
-package com.example.englishassistantapp.ui.utils
+package com.example.englishassistantapp.ui.compose.utils
 
 import android.content.Context
 import android.speech.tts.TextToSpeech

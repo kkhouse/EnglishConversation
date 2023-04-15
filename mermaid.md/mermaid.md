@@ -3,4 +3,5 @@
 - 音声認識（SpeechRecognizer）
 - テキスト生成（OpenAI chat）
 - テキスト音声 (TextToSpeech)
+- 会話添削
 
