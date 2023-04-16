@@ -8,6 +8,7 @@ import com.example.englishassistantapp.domain.network.model.ChatRole
 import com.example.englishassistantapp.domain.network.model.ChatRole.Companion.Assistant
 import com.example.englishassistantapp.domain.network.model.ChatRole.Companion.User
 import com.aallam.openai.api.model.ModelId
+import com.example.englishassistantapp.BuildConfig
 import com.example.englishassistantapp.domain.network.model.ChatChoice
 import com.example.englishassistantapp.domain.network.model.ChatCompletion
 import com.example.englishassistantapp.domain.network.model.ChatMessage
@@ -33,8 +34,10 @@ class NetworkProcessorImpl @Inject constructor(
     override suspend fun getMessage(): Result<ChatCompletion> {
         return withContext(coroutineContext) {
             kotlin.runCatching {
-//                openAI.chatCompletion(chatHandler.createRequest(null))
-                mockChatCompletion
+                when(BuildConfig.IS_MOCKED_RESPONSE_NEEDED) {
+                    true -> mockChatCompletion
+                    else -> openAI.chatCompletion(chatHandler.createRequest(null))
+                }
             }.onSuccess { chatCompletion ->
                 Log.d(TAG, "getMessage: response is $chatCompletion")
                 chatHandler.handleResponse(chatCompletion)
@@ -45,8 +48,10 @@ class NetworkProcessorImpl @Inject constructor(
     override suspend fun postMessage(message: String): Result<ChatCompletion> {
         return withContext(coroutineContext) {
             kotlin.runCatching {
-//                openAI.chatCompletion(chatHandler.createRequest(message))
-                mockChatCompletion
+                when(BuildConfig.IS_MOCKED_RESPONSE_NEEDED) {
+                    true -> mockChatCompletion
+                    else -> openAI.chatCompletion(chatHandler.createRequest(message))
+                }
             }.onSuccess { chatCompletion -> chatHandler.handleResponse(chatCompletion) }
         }
     }
@@ -58,7 +63,8 @@ private val mockChatCompletion = ChatCompletion(
     choices = listOf(
         ChatChoice(
             index = 1, message = ChatMessage(
-                role = ChatRole(role = Assistant.role), content = "Hello KK, it's nice to meet you! My name is Sarah, and I'll be happy to help you practice your English conversation skills. How has your day been so far?", name = null
+                role = ChatRole(role = Assistant.role),
+                content = "Hello KK, it's nice to meet you! My name is Sarah, and I'll be happy to help you practice your English conversation skills. How has your day been so far?", name = null
 
             ), finishReason = null
         ),

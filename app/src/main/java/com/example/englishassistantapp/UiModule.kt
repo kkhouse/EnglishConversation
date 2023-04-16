@@ -1,10 +1,10 @@
 package com.example.englishassistantapp
 
 import com.example.englishassistantapp.domain.MainRepository
-import com.example.englishassistantapp.ui.logic.UiEffect
 import com.example.englishassistantapp.ui.uimodel.UiState
 import com.example.englishassistantapp.ui.logic.UiStateHandler
 import com.example.englishassistantapp.ui.logic.UiStateHandlerImpl
+import com.example.englishassistantapp.ui.uimodel.UiEffect
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

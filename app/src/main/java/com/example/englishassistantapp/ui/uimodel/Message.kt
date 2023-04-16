@@ -9,7 +9,9 @@ import com.example.englishassistantapp.R
 data class UiState(
     val messages : List<Message> = listOf(),
     val isLoading: Boolean = false,
-    val failedMessage: String? = null
+    val failedMessage: String? = null,
+    val isUserSpeaking : Boolean = false,
+    val recognizedText: String = ""
 )
 
 data class Message(

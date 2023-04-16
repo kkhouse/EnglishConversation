@@ -1,19 +1,16 @@
 package com.example.englishassistantapp.ui.logic
 
-import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.englishassistantapp.ui.uimodel.Message
+import com.example.englishassistantapp.ui.uimodel.UiEffect
 import com.example.englishassistantapp.ui.uimodel.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-sealed class UiEffect {
-    data class SpeakMessage(val mes: String): UiEffect()
-}
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -25,23 +22,21 @@ class MainViewModel @Inject constructor(
     val uiState = _uiState.stateIn(viewModelScope, SharingStarted.Eagerly, _uiState.value)
     val effect = effectChannel.receiveAsFlow()
 
-    init {
-        Log.d("TAGTAGTAG", ": viewMOdel init ")
-        viewModelScope.launch {
-            handler.initUiState(_uiState.value).collect { newState ->
-                _uiState.value = newState
-            }
+    init { collectNewState { handler.initUiState(_uiState.value) } }
+
+    fun beSpeakingConversation(content: String) {
+        collectNewState {
+            handler.addNewMessage(_uiState.value, content)
         }
     }
 
     fun finishedSpeaking(content: String) {
-        viewModelScope.launch {
-            handler.addNewMessage(
+        collectNewState {
+            handler.postNewMessage(
                 currentState = _uiState.value,
+                effectChannel = effectChannel,
                 message = content
-            ).collect { newState ->
-                _uiState.value = newState
-            }
+            )
         }
     }
 
@@ -50,4 +45,31 @@ class MainViewModel @Inject constructor(
             effectChannel.send(UiEffect.SpeakMessage(msg.content))
         }
     }
+
+    fun takeOnMic() {
+        collectNewState {
+            handler.handleMicState(
+                currentState = _uiState.value,
+                effectChannel = effectChannel,
+                isOn = true
+            )
+        }
+    }
+
+    fun takeOffMic() {
+        collectNewState {
+            handler.handleMicState(
+                currentState = _uiState.value,
+                effectChannel = effectChannel,
+                isOn = false
+            )
+        }
+    }
+
+    private fun collectNewState(f: suspend () -> Flow<UiState>) {
+        viewModelScope.launch {
+            f().collect { _uiState.value = it }
+        }
+    }
 }
+

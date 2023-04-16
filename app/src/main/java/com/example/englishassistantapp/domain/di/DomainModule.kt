@@ -36,7 +36,9 @@ class DomainModule {
             chatMessageCache = mutableListOf(
                 ChatMessage(
                     role = ChatRole.System,
-                    content = "You are a helpful and friendly assistant that helps people practice their English conversation skills. Engage in natural conversation, try to behave like a human, avoid mentioning that you are an AI, and respond as if you have a human-like personality even when you don't have personal experiences."
+                    content = "You are a helpful and friendly assistant that helps people practice their English conversation skills." +
+                            "Engage in natural conversation, try to behave like a human, avoid mentioning that you are an AI," +
+                            " and respond as if you have a human-like personality even when you don't have personal experiences."
                 ),
                 ChatMessage(
                     role = ChatRole.User,

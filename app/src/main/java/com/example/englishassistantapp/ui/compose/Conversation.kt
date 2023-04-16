@@ -2,15 +2,14 @@
 
 package com.example.englishassistantapp.ui.compose
 
+import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.QUEUE_FLUSH
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,7 +29,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat.finishAffinity
@@ -38,14 +36,15 @@ import com.example.englishassistantapp.MainActivity
 import com.example.englishassistantapp.R
 import com.example.englishassistantapp.domain.collectInLaunchedEffect
 import com.example.englishassistantapp.ui.compose.uiextras.ErrorDialog
+import com.example.englishassistantapp.ui.compose.utils.SpeechRecognizerFactory
 import com.example.englishassistantapp.ui.compose.utils.TextToSpeechFactory
 import com.example.englishassistantapp.ui.compose.utils.messageFormatter
 import com.example.englishassistantapp.ui.logic.MainViewModel
-import com.example.englishassistantapp.ui.logic.UiEffect
 import com.example.englishassistantapp.ui.theme.EnglishAssistantAppTheme
 import com.example.englishassistantapp.ui.uimodel.Author
 import com.example.englishassistantapp.ui.uimodel.Author.Companion.toValue
 import com.example.englishassistantapp.ui.uimodel.Message
+import com.example.englishassistantapp.ui.uimodel.UiEffect
 
 @Composable
 fun Conversation(
@@ -59,14 +58,32 @@ fun Conversation(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
     val textToSpeech: TextToSpeech by remember {
         mutableStateOf(
-            TextToSpeechFactory.create(context = context,)
+            TextToSpeechFactory.create(context = context)
+        )
+    }
+    val speechRecognizer: SpeechRecognizer by remember {
+        mutableStateOf(
+            SpeechRecognizerFactory.create(
+                context = context,
+                onResult = viewModel::finishedSpeaking,
+                onError = {}, // TODO
+                onPartialResults = viewModel::beSpeakingConversation,
+                onEndOfSpeech = viewModel::takeOffMic
+            )
         )
     }
 
     viewModel.effect.collectInLaunchedEffect { effect ->
         when(effect) {
             is UiEffect.SpeakMessage -> textToSpeech.speak(effect.mes, QUEUE_FLUSH, null, null)
+            UiEffect.StartRecognition -> speechRecognizer.startListening(SpeechRecognizerFactory.getRecognizerIntent(context))
+            UiEffect.StopRecognition -> speechRecognizer.stopListening()
+            UiEffect.FinishAssistantConversation -> scrollState.scrollBy(500f)
         }
+    }
+
+    DisposableEffect(speechRecognizer) {
+        onDispose { speechRecognizer.destroy() }
     }
 
     Scaffold(
@@ -76,7 +93,6 @@ fun Conversation(
             .exclude(WindowInsets.navigationBars),
 //            .exclude(WindowInsets.ime),
         modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        floatingActionButton = {}
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -90,9 +106,14 @@ fun Conversation(
                 onMessageTap = viewModel::speechSingleMessage
             )
             ConversationButton(
-                onSpeakingEnd = viewModel::finishedSpeaking,
-                onRecognitionError = {},
-                isMicTapDisable = state.isLoading || textToSpeech.isSpeaking
+                isMicTapDisable = state.isLoading || textToSpeech.isSpeaking,
+                isUserSpeaking = state.isUserSpeaking,
+                recognizedText = state.recognizedText,
+                onMicPressing = {
+                    viewModel.takeOnMic()
+                    tryAwaitRelease()
+                    viewModel.takeOffMic()
+                },
             )
         }
     }
@@ -126,17 +147,6 @@ fun Conversation(
                     .size(120.dp)
                     .offset(x = 24.dp, y = 64.dp)
             )
-        }
-    }
-
-    if(textToSpeech.isSpeaking) {
-        AnimatedVisibility(
-            visible = textToSpeech.isSpeaking,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier.offset(12.dp, 12.dp)
-        ) {
-            ClickableText(text = AnnotatedString("Stop Speaking"), onClick = { textToSpeech.stop() })
         }
     }
 }

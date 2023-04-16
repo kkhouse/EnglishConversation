@@ -1,7 +1,5 @@
 package com.example.englishassistantapp.ui.compose
 
-import android.speech.SpeechRecognizer
-import android.speech.tts.TextToSpeech
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -12,7 +10,9 @@ import androidx.compose.foundation.gestures.PressGestureScope
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -21,102 +21,79 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.englishassistantapp.R
-import com.example.englishassistantapp.ui.compose.utils.SpeechRecognizerFactory
-import com.example.englishassistantapp.ui.compose.utils.TextToSpeechFactory
 
 @Composable
 fun ConversationButton(
-    onSpeakingEnd: (String) -> Unit,
-    onRecognitionError: () -> Unit,
-    isMicTapDisable: Boolean = false
+    isMicTapDisable: Boolean = false,
+    isUserSpeaking: Boolean = false,
+    onMicPressing: suspend PressGestureScope.(Offset) -> Unit,
+    recognizedText: String = ""
 ) {
-    val context = LocalContext.current
-    var isSpeaking by remember { mutableStateOf(false) }
-    val buttonBGColor by animateColorAsState(targetValue = if(isSpeaking) Color.LightGray else Color.Gray)
-    val speechRecognizer: SpeechRecognizer by remember {
-        mutableStateOf(
-            SpeechRecognizerFactory.create(
-                context = context,
-                onResult = onSpeakingEnd,
-                onError = onRecognitionError
-            )
-        )
-    }
-    
-    DisposableEffect(speechRecognizer) {
-        onDispose { speechRecognizer.destroy() }
-    }
-    
-    MicButton(
-        isSpeaking = isSpeaking,
+    val buttonBGColor by animateColorAsState(targetValue = if(isUserSpeaking) Color.LightGray else Color.Gray)
+    BottomBtnArea(
+        isSpeaking = isUserSpeaking,
         buttonBGColor = buttonBGColor,
-        onPress = {
-            isSpeaking = true
-            speechRecognizer.startListening(SpeechRecognizerFactory.getRecognizerIntent())
-            tryAwaitRelease()
-            isSpeaking = false
-            speechRecognizer.stopListening()
-        },
-        isMicTapDisable = isMicTapDisable
+        onPress = onMicPressing,
+        isMicTapDisable = isMicTapDisable,
+        recognizedText = recognizedText
     )
 }
 
 @Composable
-fun MicButton(
+fun BottomBtnArea(
     onPress: suspend PressGestureScope.(Offset) -> Unit,
     isSpeaking: Boolean,
     buttonBGColor : Color,
     isMicTapDisable : Boolean,
-    elevation : Dp = 8.dp
+    elevation : Dp = 8.dp,
+    recognizedText: String = ""
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 24.dp)
-            .background(if(isMicTapDisable) Color.Gray else Color.Transparent)
+    val buttonSize = 80.dp
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Canvas(
+        Text(text = recognizedText)
+        Box(
             modifier = Modifier
-                .size(120.dp)
-                .align(Alignment.Center)
-                .shadow(
-                    elevation = elevation,
-                    shape = CircleShape
-                )
-                .pointerInput(Unit) {
-                    if(isMicTapDisable.not()) {
-                        detectTapGestures(onPress = onPress)
-                    }
-                },
+                .fillMaxWidth()
+                .padding(vertical = 12.dp)
+                .background(if (isMicTapDisable) Color.Gray else Color.Transparent)
         ) {
-            drawCircle(
-                color = buttonBGColor,
-                radius = this.size.width/2,
-                center = center
+            if(!isMicTapDisable) {
+                Canvas(
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .align(Alignment.Center)
+                        .shadow(
+                            elevation = elevation,
+                            shape = CircleShape
+                        )
+                        .pointerInput(Unit) {
+                            detectTapGestures(onPress = onPress)
+                        },
+                ) {
+                    drawCircle(
+                        color = buttonBGColor,
+                        radius = this.size.width/2,
+                        center = center
+                    )
+                }
+            }
+            Image(
+                modifier = Modifier
+                    .size(buttonSize)
+                    .align(Alignment.Center),
+                painter = painterResource(id = if(isSpeaking) R.drawable.baseline_mic_24 else R.drawable.baseline_mic_none_24),
+                contentDescription = "mic"
             )
         }
-        Image(
-            modifier = Modifier
-                .size(120.dp)
-                .align(Alignment.Center),
-            painter = painterResource(id = if(isSpeaking) R.drawable.baseline_mic_24 else R.drawable.baseline_mic_none_24),
-            contentDescription = "mic"
-        )
     }
 }
-
-@Preview
-@Composable
-fun PreviewMicView() {
-    ConversationButton(onSpeakingEnd = {}, onRecognitionError = {})
-}
-
 
 /**
  * TODO

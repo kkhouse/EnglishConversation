@@ -39,7 +39,7 @@ class ChatCompletionHandlerImpl @Inject constructor(
                 chatMessageCache.removeAt(1)
                 chatMessageCache.add(
                     ChatMessage(
-                        role = ChatRole.User,
+                        role = data.choices.lastOrNull()?.message?.role ?: ChatRole.Assistant,
                         content = data.choices.lastOrNull()?.message?.content ?:""
                     )
                 )
@@ -47,7 +47,7 @@ class ChatCompletionHandlerImpl @Inject constructor(
             else -> {
                 chatMessageCache.add(
                     ChatMessage(
-                        role = ChatRole.User,
+                        role = data.choices.lastOrNull()?.message?.role ?: ChatRole.Assistant,
                         content = data.choices.lastOrNull()?.message?.content ?:""
                     )
                 )
@@ -61,6 +61,5 @@ class ChatCompletionHandlerImpl @Inject constructor(
         newContent?.let { chatMessageCache.add(ChatMessage(role = ChatRole.User, content = it)) }
         Log.d(TAG, "createRequest: chatMessageCache for request : $chatMessageCache")
         return ChatCompletionRequest(model = ModelId("gpt-3.5-turbo"), messages = chatMessageCache)
-//        return ChatCompletionRequest(model = ModelId("gpt-3.5-turbo"), messages = listOf())
     }
 }

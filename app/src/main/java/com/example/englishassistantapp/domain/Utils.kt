@@ -12,3 +12,8 @@ fun <T> Flow<T>.collectInLaunchedEffect(function: suspend (value: T) -> Unit) {
         flow.collect(function)
     }
 }
+
+
+fun String.removeBrackets(): String {
+    return this.replace("[", "").replace("]", "")
+}

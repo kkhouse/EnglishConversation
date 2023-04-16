@@ -55,11 +55,13 @@ object SpeechRecognizerFactory {
 
                     override fun onResults(p0: Bundle?) {
                         val result = p0?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).toString()
+                        Log.d(TAG, "onResults: $result")
                         onResult(result)
                     }
 
                     override fun onPartialResults(p0: Bundle?) {
                         val result = p0?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION).toString()
+                        Log.d(TAG, "onPartialResults:  $result")
                         onPartialResults(result)
                     }
 
@@ -72,9 +74,11 @@ object SpeechRecognizerFactory {
         }
     }
 
-    fun getRecognizerIntent(): Intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+    fun getRecognizerIntent(context: Context): Intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.ENGLISH)
+        putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
+        putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, context.packageName)
     }
 }
 
