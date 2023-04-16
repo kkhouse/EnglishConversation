@@ -5,15 +5,14 @@ package com.example.englishassistantapp.domain.network
 import android.util.Log
 import com.aallam.openai.api.BetaOpenAI
 import com.example.englishassistantapp.domain.network.model.ChatCompletion
-import com.aallam.openai.api.chat.ChatCompletionRequest
+import com.example.englishassistantapp.domain.network.model.ChatCompletionRequest
 import com.example.englishassistantapp.domain.network.model.ChatMessage
-import com.aallam.openai.api.chat.ChatRole
+import com.example.englishassistantapp.domain.network.model.ChatRole
 import com.aallam.openai.api.model.ModelId
 import javax.inject.Inject
 import javax.inject.Singleton
 
 
-private const val TAG = "com.example.englishassistantapp.domain.network.ChatCompletionHandler"
 
 interface ChatCompletionHandler {
     fun handleResponse(data : ChatCompletion): ChatCompletion
@@ -24,6 +23,10 @@ interface ChatCompletionHandler {
 class ChatCompletionHandlerImpl @Inject constructor(
     private val chatMessageCache: MutableList<ChatMessage>
 ): ChatCompletionHandler {
+
+    companion object {
+        private const val TAG = "ChatCompletionHandlerImpl"
+    }
 
     override fun handleResponse(data: ChatCompletion): ChatCompletion {
         /**
@@ -58,5 +61,6 @@ class ChatCompletionHandlerImpl @Inject constructor(
         newContent?.let { chatMessageCache.add(ChatMessage(role = ChatRole.User, content = it)) }
         Log.d(TAG, "createRequest: chatMessageCache for request : $chatMessageCache")
         return ChatCompletionRequest(model = ModelId("gpt-3.5-turbo"), messages = chatMessageCache)
+//        return ChatCompletionRequest(model = ModelId("gpt-3.5-turbo"), messages = listOf())
     }
 }

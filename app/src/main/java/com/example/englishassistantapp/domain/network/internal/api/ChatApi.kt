@@ -2,8 +2,8 @@ package com.example.englishassistantapp.domain.network.internal.api
 
 import com.aallam.openai.api.BetaOpenAI
 import com.example.englishassistantapp.domain.network.model.ChatCompletion
-import com.aallam.openai.api.chat.ChatCompletionChunk
-import com.aallam.openai.api.chat.ChatCompletionRequest
+import com.example.englishassistantapp.domain.network.model.ChatCompletionChunk
+import com.example.englishassistantapp.domain.network.model.ChatCompletionRequest
 import com.example.englishassistantapp.domain.network.Chat
 import com.example.englishassistantapp.domain.network.internal.extension.streamEventsFrom
 import com.example.englishassistantapp.domain.network.internal.extension.streamRequestOf

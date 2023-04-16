@@ -3,7 +3,7 @@
 package com.example.englishassistantapp.ui.uimodel
 
 import com.aallam.openai.api.BetaOpenAI
-import com.aallam.openai.api.chat.ChatRole
+import com.example.englishassistantapp.domain.network.model.ChatRole
 import com.example.englishassistantapp.R
 
 data class UiState(

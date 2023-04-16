@@ -29,7 +29,6 @@ class UiStateHandlerImpl @Inject constructor(
     }
 
     override suspend fun initUiState(currentState: UiState): Flow<UiState> {
-        Log.d("TAGTAGTAG", ": uiStateHandler initUiState ")
         return flowOn(
             onStart = { emit(currentState.copy(isLoading = true)) },
             main = {

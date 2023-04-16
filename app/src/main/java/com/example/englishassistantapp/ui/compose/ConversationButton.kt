@@ -1,19 +1,21 @@
 package com.example.englishassistantapp.ui.compose
 
-import android.os.Bundle
 import android.speech.SpeechRecognizer
+import android.speech.tts.TextToSpeech
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.*
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.PressGestureScope
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.englishassistantapp.R
 import com.example.englishassistantapp.ui.compose.utils.SpeechRecognizerFactory
+import com.example.englishassistantapp.ui.compose.utils.TextToSpeechFactory
 
 @Composable
 fun ConversationButton(
@@ -69,7 +72,8 @@ fun MicButton(
     onPress: suspend PressGestureScope.(Offset) -> Unit,
     isSpeaking: Boolean,
     buttonBGColor : Color,
-    isMicTapDisable : Boolean
+    isMicTapDisable : Boolean,
+    elevation : Dp = 8.dp
 ) {
     Box(
         modifier = Modifier
@@ -81,6 +85,10 @@ fun MicButton(
             modifier = Modifier
                 .size(120.dp)
                 .align(Alignment.Center)
+                .shadow(
+                    elevation = elevation,
+                    shape = CircleShape
+                )
                 .pointerInput(Unit) {
                     if(isMicTapDisable.not()) {
                         detectTapGestures(onPress = onPress)

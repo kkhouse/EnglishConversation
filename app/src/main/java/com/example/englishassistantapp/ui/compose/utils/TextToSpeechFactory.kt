@@ -6,7 +6,6 @@ import android.util.Log
 import java.util.*
 
 object TextToSpeechFactory {
-
     fun create(
         context: Context,
         locale: Locale= Locale.ENGLISH

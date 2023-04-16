@@ -2,8 +2,16 @@
 
 package com.example.englishassistantapp.ui.compose
 
+import android.speech.tts.TextToSpeech
+import android.speech.tts.TextToSpeech.QUEUE_FLUSH
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -16,30 +24,50 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LastBaseline
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.finishAffinity
+import com.example.englishassistantapp.MainActivity
+import com.example.englishassistantapp.R
+import com.example.englishassistantapp.domain.collectInLaunchedEffect
+import com.example.englishassistantapp.ui.compose.uiextras.ErrorDialog
+import com.example.englishassistantapp.ui.compose.utils.TextToSpeechFactory
 import com.example.englishassistantapp.ui.compose.utils.messageFormatter
 import com.example.englishassistantapp.ui.logic.MainViewModel
+import com.example.englishassistantapp.ui.logic.UiEffect
 import com.example.englishassistantapp.ui.theme.EnglishAssistantAppTheme
 import com.example.englishassistantapp.ui.uimodel.Author
 import com.example.englishassistantapp.ui.uimodel.Author.Companion.toValue
 import com.example.englishassistantapp.ui.uimodel.Message
-import dagger.hilt.android.lifecycle.HiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel as injectedViewModel
 
 @Composable
 fun Conversation(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+    val context = LocalContext.current
     val state = viewModel.uiState.collectAsState().value
     val scrollState = rememberLazyListState()
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
+    val textToSpeech: TextToSpeech by remember {
+        mutableStateOf(
+            TextToSpeechFactory.create(context = context,)
+        )
+    }
+
+    viewModel.effect.collectInLaunchedEffect { effect ->
+        when(effect) {
+            is UiEffect.SpeakMessage -> textToSpeech.speak(effect.mes, QUEUE_FLUSH, null, null)
+        }
+    }
 
     Scaffold(
         topBar = { ChannelNameBar() },
@@ -55,12 +83,60 @@ fun Conversation(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Messages(messages = state.messages, scrollState = scrollState, modifier = Modifier.weight(1f))
+            Messages(
+                messages = state.messages,
+                scrollState = scrollState,
+                modifier = Modifier.weight(1f),
+                onMessageTap = viewModel::speechSingleMessage
+            )
             ConversationButton(
                 onSpeakingEnd = viewModel::finishedSpeaking,
                 onRecognitionError = {},
-                isMicTapDisable = false
+                isMicTapDisable = state.isLoading || textToSpeech.isSpeaking
             )
+        }
+    }
+
+    state.failedMessage?.let {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent)
+        ) {
+            ErrorDialog(
+                onDismiss = { finishAffinity(context as MainActivity) },
+                text = it
+            )
+        }
+    }
+
+    if(state.isLoading) {
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Transparent)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = { /* do nothing */ }
+                )
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(120.dp)
+                    .offset(x = 24.dp, y = 64.dp)
+            )
+        }
+    }
+
+    if(textToSpeech.isSpeaking) {
+        AnimatedVisibility(
+            visible = textToSpeech.isSpeaking,
+            enter = fadeIn(),
+            exit = fadeOut(),
+            modifier = Modifier.offset(12.dp, 12.dp)
+        ) {
+            ClickableText(text = AnnotatedString("Stop Speaking"), onClick = { textToSpeech.stop() })
         }
     }
 }
@@ -70,7 +146,7 @@ fun Messages(
     messages: List<Message>,
     scrollState: LazyListState,
     modifier: Modifier,
-//    onMessageTap: (Message) -> Unit, TODO
+    onMessageTap: (Message) -> Unit,
 ) {
     Box(modifier = modifier) {
         LazyColumn(
@@ -87,7 +163,8 @@ fun Messages(
                         msg = content,
                         isUserMe = content.author == Author.Me,
                         isFirstMessageByAuthor = isFirstMessageByAuthor,
-                        isLastMessageByAuthor = isLastMessageByAuthor
+                        isLastMessageByAuthor = isLastMessageByAuthor,
+                        onMessageTap = onMessageTap
                     )
                 }
             }
@@ -100,7 +177,8 @@ fun Message(
     msg: Message,
     isUserMe: Boolean,
     isFirstMessageByAuthor: Boolean,
-    isLastMessageByAuthor: Boolean
+    isLastMessageByAuthor: Boolean,
+    onMessageTap: (Message) -> Unit,
 ) {
     val borderColor = if (isUserMe) {
         MaterialTheme.colorScheme.primary
@@ -137,6 +215,16 @@ fun Message(
                 .padding(end = 16.dp)
                 .weight(1f)
         )
+        Image(
+            modifier = Modifier
+                .size(42.dp)
+                .clip(CircleShape)
+                .align(Alignment.CenterVertically)
+                .clickable { onMessageTap(msg) },
+            painter = painterResource(id = R.drawable.baseline_speaker_phone_24),
+            contentScale = ContentScale.Crop,
+            contentDescription = null,
+        )
     }
 }
 
@@ -146,7 +234,7 @@ fun AuthorAndTextMessage(
     isUserMe: Boolean,
     isFirstMessageByAuthor: Boolean,
     isLastMessageByAuthor: Boolean,
-    modifier: Modifier
+    modifier: Modifier,
 ) {
     Column(modifier = modifier) {
         if (isLastMessageByAuthor) {
@@ -221,7 +309,8 @@ fun PreviewMessage() {
             messages = listOf(
                 Message(author = Author.Assistant, content = "assistant message"),
                 Message(author = Author.Me, content = "Me message")
-            )
+            ),
+            onMessageTap = {}
         )
     }
 }

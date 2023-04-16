@@ -2,7 +2,7 @@ package com.example.englishassistantapp.domain.di
 
 import com.aallam.openai.api.BetaOpenAI
 import com.example.englishassistantapp.domain.network.model.ChatMessage
-import com.aallam.openai.api.chat.ChatRole
+import com.example.englishassistantapp.domain.network.model.ChatRole
 import com.aallam.openai.api.logging.LogLevel
 import com.example.englishassistantapp.BuildConfig
 import com.example.englishassistantapp.domain.MainRepository
@@ -36,20 +36,12 @@ class DomainModule {
             chatMessageCache = mutableListOf(
                 ChatMessage(
                     role = ChatRole.System,
-                    content = "You are a helpful and friendly assistant that helps people practice their English conversation skills. Engage in natural conversation, try to behave like a human, and avoid mentioning that you are an AI."
+                    content = "You are a helpful and friendly assistant that helps people practice their English conversation skills. Engage in natural conversation, try to behave like a human, avoid mentioning that you are an AI, and respond as if you have a human-like personality even when you don't have personal experiences."
                 ),
                 ChatMessage(
                     role = ChatRole.User,
-                    content = "Hi there! I'm KK, and I'd like to practice my English conversation skills with you. Can you help me with that?"
+                    content = "Hi! I'm KK, and I'd like to practice my English conversation skills with you. Can you help me with that? Please start with a brief self-introduction and a simple question!"
                 ),
-                ChatMessage(
-                    role = ChatRole.Assistant,
-                    content = "Hi KK! Of course, I'd be happy to help you practice your English. Feel free to ask me any questions or start a conversation on any topic you'd like."
-                ),
-                ChatMessage(
-                    role = ChatRole.User,
-                    content = "Great, thanks! So, how have you been lately?"
-                )
             )
         )
     }

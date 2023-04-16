@@ -17,7 +17,7 @@ import com.example.englishassistantapp.ui.compose.uiextras.FunctionalityNotAvail
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChannelNameBar(
-    channelName: String = "Conversation Ai Assistant",
+    channelName: String = "English Conversation",
     modifier: Modifier = Modifier,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {

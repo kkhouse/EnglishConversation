@@ -11,16 +11,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.aallam.openai.api.BetaOpenAI
-import com.aallam.openai.api.chat.ChatCompletionRequest
-import com.example.englishassistantapp.domain.network.model.ChatMessage
-import com.aallam.openai.api.chat.ChatRole
-import com.aallam.openai.api.logging.LogLevel
-import com.aallam.openai.api.model.ModelId
-import com.example.englishassistantapp.domain.network.OpenAI
-import com.example.englishassistantapp.domain.network.OpenAIConfig
 import com.example.englishassistantapp.ui.compose.Conversation
 import com.example.englishassistantapp.ui.theme.EnglishAssistantAppTheme
 import dagger.hilt.android.AndroidEntryPoint

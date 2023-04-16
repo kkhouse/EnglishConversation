@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 
 @Composable
 fun FunctionalityNotAvailablePopup(onDismiss: () -> Unit) {
@@ -29,6 +30,25 @@ fun FunctionalityNotAvailablePopup(onDismiss: () -> Unit) {
         text = {
             Text(
                 text = "Functionality not available \uD83D\uDE48",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "CLOSE")
+            }
+        }
+    )
+}
+
+@Composable
+fun ErrorDialog(modifier: Modifier = Modifier,onDismiss: () -> Unit, text: String) {
+    AlertDialog(
+        modifier = modifier ,
+        onDismissRequest = onDismiss,
+        text = {
+            Text(
+                text = "Error, cause, $text",
                 style = MaterialTheme.typography.bodyMedium
             )
         },

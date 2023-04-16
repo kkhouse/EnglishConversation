@@ -2,9 +2,7 @@
 
 package com.example.englishassistantapp.domain
 
-import android.util.Log
 import com.aallam.openai.api.BetaOpenAI
-import com.example.englishassistantapp.domain.network.model.ChatMessage
 import com.example.englishassistantapp.domain.network.NetworkProcessor
 import com.example.englishassistantapp.domain.network.model.ChatCompletion
 import javax.inject.Inject
@@ -19,7 +17,6 @@ class MainRepositoryImpl @Inject constructor(
     private val networkProcessor: NetworkProcessor
 ): MainRepository {
     override suspend fun getMessage(): Result<ChatCompletion> {
-        Log.d("TAGTAGTAG", ": MainRepositoryImpl getMessage ")
         return networkProcessor.getMessage()
     }
 

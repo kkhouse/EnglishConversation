@@ -2,7 +2,6 @@ package com.example.englishassistantapp.domain.network.model
 
 import com.aallam.openai.api.BetaOpenAI
 import com.aallam.openai.api.OpenAIDsl
-import com.aallam.openai.api.chat.ChatRole
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
