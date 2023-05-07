@@ -1,10 +1,9 @@
 ## Usage
 
-Add the following to your gradle.properties
+Add 'your_openai_api_key' to the following in build.gradle
 
 ```
-OPENAI_API_KEY="your_openai_api_key"
-IS_MOCKED_RESPONSE_NEEDED =false
+buildConfigField("String", "OPENAI_API_KEY", "your_openai_api_key")
 ```
 
 Please refer to the OpenAI documentation for the ApiKey. (Note that there may be a fee for this openAi service.)
