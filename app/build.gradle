@@ -30,8 +30,8 @@ android {
         }
 
         debug {
-            buildConfigField("String", "OPENAI_API_KEY", "your_openai_api_key")
-            buildConfigField("Boolean", "IS_MOCKED_RESPONSE_NEEDED", "false")
+            buildConfigField("String", "OPENAI_API_KEY", OPENAI_API_KEY)
+            buildConfigField("Boolean", "IS_MOCKED_RESPONSE_NEEDED", IS_MOCKED_RESPONSE_NEEDED)
         }
     }
     compileOptions {
